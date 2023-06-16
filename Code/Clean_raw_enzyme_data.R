@@ -3,6 +3,9 @@
 # Load packages
 library(tidyverse) # ver 2.0.0
 
+
+#########################################################################################
+# STEP 1: Read data ####
 # Read data (adapt for file format)
 dat <- readxl::read_xlsx("Data/test_data.xlsx", range = "A14:L21", col_names = FALSE)
 
@@ -28,5 +31,20 @@ samples_long <- samples |>
 # Join sample list with raw data
 data <- full_join(samples_long, dat_long, by = "well_ID")
 
+########################################################################################
+# Step 2: Data validation ####
+# Calculate mean fluorescence and check for outliers
 
+data |> 
+  ggplot(aes(fluo))+
+  geom_boxplot()+
+  facet_grid(sampleID ~. )
+
+# Calculate mean fluorescence
+mean <- data |> 
+  group_by(sampleID) |> 
+  summarise(n = n(),
+            mean = mean(fluo, na.rm = TRUE),
+            sd = sd(fluo, na.rm = TRUE)) |> 
+  mutate(se = sd/sqrt(n))
 
